@@ -15,11 +15,12 @@ class MediaProcessor:
             'monsterat': "fonts/Montserrat/static/Montserrat-Regular.ttf",
             'playfair': 'fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf',
             'roboto': 'fonts/Roboto/Roboto-Regular.ttf',
+            'roboto_bold': 'fonts/Roboto/Roboto-BoldItalic.ttf',
             'roboto_mono': 'fonts/Roboto_Mono/static/RobotoMono-Regular.ttf',
             'ubuntu': 'fonts/Ubuntu/Ubuntu-Regular.ttf'
         }
 
-    def overlay_text_on_image(self, image, text, platform, font='ubuntu', font_size_ratio=0.5, padding_ratio=0.05, corner_radius_ratio=0.02):
+    def overlay_text_on_image(self, image, text, platform, font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
         dimensions = self.platform_dimensions.get(platform)
         if dimensions:
             # Resize image to dimensions
@@ -32,7 +33,6 @@ class MediaProcessor:
         if font_file:
             # Estimate font size based on image size and text length
             font_size = self.estimate_font_size(image, text, font_file, font_size_ratio)
-            print(f'Estimated font size: {font_size}')  # Debug print
             font = ImageFont.truetype(font_file, font_size)
             # Estimate the size of the text
             lines = text.split('\n')
@@ -62,23 +62,21 @@ class MediaProcessor:
     def estimate_font_size(self, image, text, font_file, font_size_ratio):
         # Start with a font size proportional to image width
         font_size = int(font_size_ratio * image.width)
-        font_size = min(font_size, 40)  # Add an upper limit to the initial font size
-        print(f'Initial font size: {font_size}')  # Debug print
-        font = ImageFont.truetype(font_file, max(font_size, 50))  # Ensure font_size is at least 50
+        font_size = min(font_size, 45)  # Add an upper limit to the initial font size
+        font = ImageFont.truetype(font_file, max(font_size, 70))  # Ensure font_size is at least 50
         # Create off-screen image and draw text
         offscreen = Image.new('RGB', (1, 1))
         offscreen_draw = ImageDraw.Draw(offscreen)
-        offscreen_draw.text((0, 0), text, font=font)
-        # Get size of off-screen image (which is size of text)
-        text_width, text_height = offscreen.size
-        # If text width or height is greater than image width or height, reduce font size
-        while text_width > image.width or text_height > image.height:
+        # Split text into lines
+        lines = text.split('\n')
+        # Get maximum width of lines
+        max_text_width = max(offscreen_draw.textlength(line, font=font) for line in lines)
+        # If max text width is greater than image width, reduce font size
+        while max_text_width > image.width:
             font_size -= 1
             font_size = max(font_size, 1)  # Ensure font_size is at least 1
-            print(f'Reduced font size: {font_size}')  # Debug print
             font = ImageFont.truetype(font_file, font_size)
-            offscreen_draw.text((0, 0), text, font=font)
-            text_width, text_height = offscreen.size
+            max_text_width = max(offscreen_draw.textlength(line, font=font) for line in lines)
         return font_size
 
 
@@ -125,12 +123,7 @@ class MediaProcessor:
             video = video.set_audio(audio)
 
         return video
-    
-    def process_media(self, media_type, path, platform, font='ubuntu', font_size=72, audio_folder=None, output_file=None, quote_file=None, quote_topic=None):
-        # Check that font_size is not too small
-        if font_size < 1:
-            raise ValueError('font_size must be at least 1')
-
+    def process_media(self, media_type, path, platform, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote_topic=None, quote=None):
         # Instantiate the QuoteFetcher class
         quote_fetcher = QuoteFetcher()
 
@@ -139,18 +132,18 @@ class MediaProcessor:
             text = quote_fetcher.fetch_quote(quote_file)
         elif quote_topic:
             text = quote_fetcher.fetch_quote_from_api(quote_topic)
+        elif quote:
+            text = quote
         else:
-            raise ValueError('Either quote_file or quote_topic must be provided')
+            raise ValueError('Either quote_file, quote_topic, or quote must be provided')
 
         if media_type == 'image':
             image = Image.open(path)
-            print(f'Font size before overlay: {font_size}')  # Print the font size before overlay
-            processed_image = self.overlay_text_on_image(image, text, platform, font, font_size)
-            print(f'Font size after overlay: {font_size}')  # Print the font size after overlay
+            processed_image = self.overlay_text_on_image(image, text, platform, font, font_size_ratio)
             output_file = output_file if output_file else 'processed_image.jpg'
             processed_image.save(output_file)
         elif media_type == 'video':
-            processed_video = self.overlay_text_on_video(path, text, platform, font, font_size)
+            processed_video = self.overlay_text_on_video(path, text, platform, font, font_size_ratio)
             if audio_folder:
                 processed_video = self.add_voice_over(processed_video, audio_folder)
             output_file = output_file if output_file else 'processed_video.mp4'

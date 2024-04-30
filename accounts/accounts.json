@@ -1,0 +1,31 @@
+[
+    {
+        "id": 0,
+        "type": "gmail",
+        "name": "Auto Muse",
+        "email": "automuse255@gmail.com",
+        "password": "password"
+    },
+    {
+        "id": 1,
+        "type": "gmail",
+        "name": "natural stoic",
+        "email": "the.natural.stoic@gmail.com",
+        "password": "password"
+    },
+    {
+        "id": 2,
+        "type": "instagram",
+        "name": "natural stoic",
+        "username": "the.natural.stoic",
+        "email": "the.natural.stoic@gmail.com",
+        "password": "password"
+    },
+    {
+        "id": 3,
+        "type": "facebook",
+        "name": "marcus aurelias",
+        "email": "the.natural.stoic@gmail.com",
+        "password": "password"
+    }
+]

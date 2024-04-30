@@ -3,3 +3,4 @@ ipykernel
 Pillow
 moviepy
 matplotlib
+instagrapi

@@ -1,12 +1,27 @@
 import json
 import random
+import requests
+import textwrap
 
 class QuoteFetcher:
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self):
+        pass
 
-    def fetch_quote(self):
-        with open(self.file_path, 'r') as file:
+
+    def fetch_quote(self, file_path):
+        with open(file_path, 'r') as file:
             quotes = json.load(file)
         selected_quote = random.choice(quotes)
-        return f'"{selected_quote["quote"]}"\n - {selected_quote["author"]}'
+        wrapped_quote = textwrap.fill(selected_quote["quote"], width=50)
+        return f'"{wrapped_quote}"\n\t\t\t - {selected_quote["author"]}'
+
+    def fetch_quote_from_api(self, topic):
+        try:
+            response = requests.get(f'https://api.quotable.io/random?tags={topic}')
+            response.raise_for_status()
+            data = response.json()
+            wrapped_quote = textwrap.fill(data["content"], width=50)
+            return f'"{wrapped_quote}"\n - {data["author"]}'
+        except requests.RequestException as e:
+            print(f"An error occurred while fetching quote: {e}")
+            return None

@@ -4,12 +4,13 @@ from PIL import Image
 import io
 
 class MediaFetcher:
-    def __init__(self, access_key):
+    def __init__(self):
         self.access_key = os.getenv("UNSPLASH_ACCESS_KEY")
         self.platform_dimensions = {
-            'facebook': ((1, 1), 1080),  # aspect ratio and max dimension for Facebook
-            'twitter': ((16, 9), 1024),  # aspect ratio and max dimension for Twitter
-            'instagram': ((1, 1), 1080)  # aspect ratio and max dimension for Instagram
+            'facebook': ((1, 1), 1440),  # aspect ratio and max dimension for Facebook
+            'twitter': ((16, 9), 1440),  # aspect ratio and max dimension for Twitter
+            'instagram': ((1, 1), 1440),  # aspect ratio and max dimension for Instagram
+            'instagram_story': ((9, 16), 1440)  # aspect ratio and max dimension for Instagram Story
         }
         self.query_history = []
 
@@ -21,7 +22,7 @@ class MediaFetcher:
         # Save the image
         image.save(filename)
 
-    def resize_image(self, image_path, platform, aspect_ratio, max_dimension, filename):
+    def resize_image(self, image_path, platform, filename):
         # Open the image
         image = Image.open(image_path)
 

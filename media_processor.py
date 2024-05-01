@@ -20,7 +20,7 @@ class MediaProcessor:
             'ubuntu': 'fonts/Ubuntu/Ubuntu-Regular.ttf'
         }
 
-    def overlay_text_on_image(self, image, text, platform, font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
+    def overlay_text_on_image(self, image, text, platform, position='middle', font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
         dimensions = self.platform_dimensions.get(platform)
         if dimensions:
             # Resize image to dimensions
@@ -40,7 +40,12 @@ class MediaProcessor:
             text_height = font_size * len(lines)  # The height of the text is roughly the size of the font times the number of lines
             # Calculate position to center text
             x = (image.width - max_text_width) / 2
-            y = (image.height - text_height) / 2
+            if position == 'top':
+                y = (0.5 * text_height)
+            elif position == 'bottom':
+                y = image.height - (1.5 * text_height)
+            else:  # default to 'middle'
+                y = (image.height - text_height) / 2
             # Calculate padding and corner radius
             padding = max(image.width, image.height) * padding_ratio
             corner_radius = max(image.width, image.height) * corner_radius_ratio
@@ -123,7 +128,8 @@ class MediaProcessor:
             video = video.set_audio(audio)
 
         return video
-    def process_media(self, media_type, path, platform, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote_topic=None, quote=None):
+    
+    def process_media(self, media_type, path, platform, position='middle', font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote_topic=None, quote=None, quote_text=None):
         # Instantiate the QuoteFetcher class
         quote_fetcher = QuoteFetcher()
 
@@ -134,12 +140,14 @@ class MediaProcessor:
             text = quote_fetcher.fetch_quote_from_api(quote_topic)
         elif quote:
             text = quote
+        elif quote_text:
+            text = quote_text
         else:
             raise ValueError('Either quote_file, quote_topic, or quote must be provided')
 
         if media_type == 'image':
             image = Image.open(path)
-            processed_image = self.overlay_text_on_image(image, text, platform, font, font_size_ratio)
+            processed_image = self.overlay_text_on_image(image, text, platform, position, font, font_size_ratio)
             output_file = output_file if output_file else 'processed_image.jpg'
             processed_image.save(output_file)
         elif media_type == 'video':

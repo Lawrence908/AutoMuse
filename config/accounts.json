@@ -27,5 +27,12 @@
         "name": "marcus aurelias",
         "email": "the.natural.stoic@gmail.com",
         "password": "password"
+    },
+    {
+        "id": 4,
+        "type": "vpn",
+        "vpn": "hide.me",
+        "name": "AutoMuse",
+        "password": "password"
     }
 ]

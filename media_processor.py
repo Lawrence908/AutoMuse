@@ -1,24 +1,19 @@
 import os
+import io
+import json
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
 from quote_fetcher import QuoteFetcher
 
 class MediaProcessor:
     def __init__(self):
-        self.platform_dimensions = {
-            'facebook': (1.91, 1),
-            'twitter': (2, 1),
-            'instagram': (1, 1)
-        }
-        self.fonts = {
-            'jersey': "fonts/Jersey_15/Jersey15-Regular.ttf",
-            'monsterat': "fonts/Montserrat/static/Montserrat-Regular.ttf",
-            'playfair': 'fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf',
-            'roboto': 'fonts/Roboto/Roboto-Regular.ttf',
-            'roboto_bold': 'fonts/Roboto/Roboto-BoldItalic.ttf',
-            'roboto_mono': 'fonts/Roboto_Mono/static/RobotoMono-Regular.ttf',
-            'ubuntu': 'fonts/Ubuntu/Ubuntu-Regular.ttf'
-        }
+        # Load the platform dimensions from the JSON file
+        with open('config/platform_dimensions.json') as f:
+            self.platform_dimensions = json.load(f)
+        # Load the available fonts from the JSON file
+        with open('config/fonts.json') as f:
+            self.fonts = json.load(f)
+
 
     def overlay_text_on_image(self, image, text, platform, position='middle', font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
         dimensions = self.platform_dimensions.get(platform)
@@ -129,15 +124,15 @@ class MediaProcessor:
 
         return video
     
-    def process_media(self, media_type, path, platform, position='middle', font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote_topic=None, quote=None, quote_text=None):
+    def process_media(self, media_type, path, platform, text_overlay_option='middle', font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote=None, quote_text=None, tags=None):
         # Instantiate the QuoteFetcher class
         quote_fetcher = QuoteFetcher()
 
         # Fetch a quote
         if quote_file:
             text = quote_fetcher.fetch_quote(quote_file)
-        elif quote_topic:
-            text = quote_fetcher.fetch_quote_from_api(quote_topic)
+        elif tags:
+            text = quote_fetcher.fetch_quote_from_api(tags)
         elif quote:
             text = quote
         elif quote_text:
@@ -147,7 +142,7 @@ class MediaProcessor:
 
         if media_type == 'image':
             image = Image.open(path)
-            processed_image = self.overlay_text_on_image(image, text, platform, position, font, font_size_ratio)
+            processed_image = self.overlay_text_on_image(image, text, platform, text_overlay_option, font, font_size_ratio)
             output_file = output_file if output_file else 'processed_image.jpg'
             processed_image.save(output_file)
         elif media_type == 'video':

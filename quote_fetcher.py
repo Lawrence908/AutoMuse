@@ -5,8 +5,17 @@ import textwrap
 import urllib.parse
 
 class QuoteFetcher:
-    def __init__(self):
-        self.tags = self.fetch_tags()
+    def __init__(self, quote_option, tag=None, quote=None, author=None):
+        # self.tags = self.fetch_tags()
+        self.quote_option = quote_option
+        if self.quote_option == "Enter your own text":
+            self.user_entered_quote(quote, author)
+        elif self.quote_option == "quotable":
+            self.fetch_quote_from_api(tag)
+        elif self.quote_option == "stoic_quotes.json":
+            self.fetch_quote('config/stoic_quotes.json')
+        else:
+            raise ValueError("Invalid quote option")
 
     def fetch_tags(self):
         with open('config/quotable_tags.json') as f:

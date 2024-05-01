@@ -1,0 +1,13 @@
+{
+    "instagram": [[1, 1], 1440],
+    "instagram_story": [[9, 16], 1440],
+    "facebook": [[1, 1], 2048],
+    "twitter": [[16, 9], 1600],
+    "linkedin": [[1.91, 1], 1200],
+    "pinterest": [[2, 3], 2000],
+    "tumblr": [[4, 3], 1280],
+    "snapchat": [[9, 16], 1080],
+    "youtube": [[16, 9], 1920],
+    "youtube_shorts": [[9, 16], 1080],
+    "tiktok": [[9, 16], 1080]
+}

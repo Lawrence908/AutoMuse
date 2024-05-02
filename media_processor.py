@@ -17,20 +17,15 @@ class MediaProcessor:
 
 
     def overlay_text_on_image(self, image, text, platform, position='Middle', font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
-        dimensions = self.platform_dimensions.get(platform)
-        print(f"Dimensions for platform '{platform}': {dimensions}")
-        if dimensions:
-            # Check if dimensions[0] is a list itself
-            if isinstance(dimensions[0], list):
-                resize_dimensions = dimensions[0]
-            else:
-                resize_dimensions = dimensions
-
-            # Resize image to dimensions
-            image = image.resize((int(image.width * resize_dimensions[0]), int(image.height * resize_dimensions[1])))
         # Overlay text on image
         draw = ImageDraw.Draw(image)
         font_file = self.fonts.get(font)
+        if not font_file:
+            font_file = self.fonts.get('ubuntu')
+        if font_file:
+            # Estimate font size based on image size and text length
+            font_size = self.estimate_font_size(image, text, font_file, font_size_ratio)
+            font = ImageFont.truetype(font_file, font_size)
         if not font_file:
             font_file = self.fonts.get('ubuntu')
         if font_file:

@@ -20,6 +20,9 @@ class Automator:
         self.media_processor = MediaProcessor()
 
     def create_media_fetcher(self):
+        print("In create_media_fetcher")
+        print("self.image_query", self.image_query)
+        print("self.platform", self.platform)
         self.media_fetcher = MediaFetcher(self.image_query, self.platform)
 
     def set_parameters(self, image_query, quote_option, text_overlay_option, platform, tag=None, quote=None, author=None, font='roboto_bold'):
@@ -36,7 +39,9 @@ class Automator:
         self.quote_fetcher = QuoteFetcher(self.quote_option, self.tag, quote, author)
 
     def fetch_media(self):
-        self.media_files = self.media_fetcher.fetch_image()
+        print("fetch_media")
+        print("self.platform", self.platform)
+        self.media_files = self.media_fetcher.fetch_image(self.platform)
         return self.media_files
     
     def fetch_quote_and_process_media(self, media_file):

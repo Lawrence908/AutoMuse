@@ -9,7 +9,10 @@ class AutomatorGUI:
     def __init__(self, master):
         self.master = master
         master.title("AutoMuse")
-        master.geometry("800x600")
+        master.geometry("1200x900")
+        master.resizable(False, False)
+        master.columnconfigure(0, weight=1)
+        master.rowconfigure(0, weight=1)
 
         self.automator = Automator()  # Initialize the Automator class
         # Initialize image_selection_frame
@@ -27,6 +30,10 @@ class AutomatorGUI:
 
         with open('config/fonts.json') as f:
             self.fonts = json.load(f)
+
+        self.platform_combobox = ttk.Combobox(self.master, values=self.platforms)
+        self.platform_combobox.pack()
+        self.platform_combobox.set(self.platforms[0])
 
         # Define the image query dropdown menu
         self.label1 = tk.Label(master, text="Image Query:")
@@ -93,7 +100,10 @@ class AutomatorGUI:
 
         image_query = self.query_var.get()
         self.automator.image_query = image_query
-        self.automator.platform = self.platform_var.get()
+        self.automator.platform = self.platform_combobox.get()
+        print("In fetch_image")
+        print(f"Fetching images for query: {image_query}")
+        print(f"Platform: {self.automator.platform}")
         self.automator.create_media_fetcher()
         self.image_files = self.automator.fetch_media()
         self.display_images()
@@ -103,12 +113,13 @@ class AutomatorGUI:
             print("No images to display")
         else:
             # Create a frame for the image thumbnails
-            self.image_frame = Frame(self.master)
-            self.image_frame.pack(side='left', expand=True, fill='both')
+            self.image_frame = Frame(self.master, width=1150, height=800)
+            self.image_frame.pack_propagate(False)  # Don't shrink the frame to fit its contents
+            self.image_frame.pack(side='top', expand=True, fill='both')
 
             # Create a canvas inside the frame
             self.canvas = Canvas(self.image_frame)
-            self.canvas.pack(side='left', fill='both', expand=True)
+            self.canvas.pack(side='top', fill='both', expand=True)
 
             # Create a frame inside the canvas to hold the thumbnails
             self.thumbnail_frame = Frame(self.canvas)
@@ -117,7 +128,10 @@ class AutomatorGUI:
             row, column = 0, 0
             for image_file in self.image_files:
                 image = Image.open(image_file)
-                image.thumbnail((200, 200))
+                if self.automator.platform == 'instagram_story':
+                    image.thumbnail((400, 400))
+                else:
+                    image.thumbnail((200, 200))
                 photo = ImageTk.PhotoImage(image)
 
                 # Create the frame
@@ -145,9 +159,9 @@ class AutomatorGUI:
     def fetch_quote(self):
         print("In fetch_quote")  # Debug print
 
-        # Define platform before assigning it
-        platform = self.platform_combobox.get()
-        self.automator.platform = platform
+        # # Define platform before assigning it
+        # platform = self.platform_combobox.get()
+        # self.automator.platform = platform
 
         # Define text_overlay_option before assigning it
         text_overlay_option = self.overlay_combobox.get()
@@ -173,7 +187,7 @@ class AutomatorGUI:
 
         self.automator.quote_option = quote_option
         self.automator.text_overlay_option = text_overlay_option
-        self.automator.platform = platform
+        # self.automator.platform = platform
         self.automator.font = font
         self.automator.tag = tag
         self.automator.quote = quote
@@ -197,7 +211,7 @@ class AutomatorGUI:
         self.image_frame.pack(side='left', expand=True, fill='both')
 
         image = Image.open(self.image_file)
-        image.thumbnail((200, 200))
+        image.thumbnail((700, 700))
         photo = ImageTk.PhotoImage(image)
 
         label = Label(self.image_frame, image=photo)
@@ -213,14 +227,13 @@ class AutomatorGUI:
         # Fetch the quote based on the selected image
         self.fetch_quote()
 
-    def on_image_selected(self, event):
-        # Instead of opening a new window, show the quote options frame
-        self.display_quote_options()
-
     def display_quote_options(self):
-
         print("In display_quote_options")  # Debug print
         # ... rest of the code ...
+
+        # Hide the platform combobox
+        if hasattr(self, 'platform_combobox'):
+            self.platform_combobox.pack_forget()
 
         # Create a new frame for the quote options
         self.quote_options_frame = tk.Frame(self.master)
@@ -234,31 +247,21 @@ class AutomatorGUI:
         # Add a callback for when the selected quote option changes
         self.quote_combobox.bind('<<ComboboxSelected>>', self.update_quote_options)
 
-        # Create the quotable tags dropdown in the quote options frame, but don't pack it yet
-        # tag_options = [f"{tag} ({count})" for tag, count in self.quotable_tags.items()]
-        # self.tag_combobox = ttk.Combobox(self.quote_options_frame, values=tag_options)
-        # self.tag_combobox.set(tag_options[0])
-
-        self.overlay_combobox = ttk.Combobox(self.master, values=["Top", "Middle", "Bottom"])
+        self.overlay_combobox = ttk.Combobox(self.quote_options_frame, values=["Top", "Middle", "Bottom"])
         self.overlay_combobox.pack()
         self.overlay_combobox.set('Middle')
 
-        self.platform_combobox = ttk.Combobox(self.master, values=self.platforms)
-        self.platform_combobox.pack()
-        self.platform_combobox.set(self.platforms[0])
-
         tag_options = [f"{tag} ({count})" for tag, count in self.quotable_tags.items()]
-        self.tag_combobox = ttk.Combobox(self.master, values=tag_options)
+        self.tag_combobox = ttk.Combobox(self.quote_options_frame, values=tag_options)
         self.tag_combobox.pack()
         self.tag_combobox.set(tag_options[0])
 
-
-        self.font_combobox = ttk.Combobox(self.master, values=list(self.fonts.keys()))
+        self.font_combobox = ttk.Combobox(self.quote_options_frame, values=list(self.fonts.keys()))
         self.font_combobox.pack()
         self.font_combobox.set('roboto_bold')
 
         # Set up the button
-        self.process_button = tk.Button(self.master, text="Process Image", command=self.process_image)
+        self.process_button = tk.Button(self.quote_options_frame, text="Process Image", command=self.process_image)
         self.process_button.pack()
 
         # # Add a command to the process button to hide the quote options frame and show the next frame
@@ -267,6 +270,25 @@ class AutomatorGUI:
         # Create the textboxes for the quote and author, but don't pack them yet
         self.quote_textbox = tk.Text(self.quote_options_frame, height=2, width=30)
         self.author_textbox = tk.Text(self.quote_options_frame, height=2, width=30)
+
+        # Set up the back button
+        def back():
+            # Clear the current image selection
+            self.current_image = None
+
+            # Hide the selected image
+            if hasattr(self, 'image_frame'):
+                self.image_frame.pack_forget()
+
+            # Hide the quote options frame
+            if hasattr(self, 'quote_options_frame'):
+                self.quote_options_frame.pack_forget()
+
+            # Show the select images window again
+            self.display_select_images_window()
+
+        back_button = tk.Button(self.quote_options_frame, text="Back", command=back)
+        back_button.pack()
 
     def update_quote_options(self, event):
         # Get the selected quote option
@@ -305,6 +327,20 @@ class AutomatorGUI:
             # Show the tag_combobox
             self.tag_combobox.pack()
 
+    def display_select_images_window(self):
+        # Pack the platform combobox
+        self.platform_combobox.pack()
+
+        # Pack the image query dropdown menu
+        self.label1.pack()
+        self.query_option_menu.pack()
+
+        # Pack the fetch image button
+        self.fetch_image_button.pack()
+
+        # Call the method to display the images
+        self.display_images()
+
     def show_next_frame(self):
         # Define next_frame before packing it
         self.next_frame = tk.Frame(self.master)
@@ -317,8 +353,8 @@ class AutomatorGUI:
         print("quote_option:", quote_option)
         overlay_option = self.overlay_combobox.get()
         print("overlay_option:", overlay_option)
-        platform_option = self.platform_combobox.get()
-        print("platform_option:", platform_option)
+        # platform_option = self.platform_combobox.get()
+        # print("platform_option:", platform_option)
         tag_option = self.tag_combobox.get()
         print("tag_option:", tag_option)
         tag = tag_option.split()[0]  # Extract the tag from the selected option
@@ -341,7 +377,7 @@ class AutomatorGUI:
 
         # Process the image with the selected options
         print("Setting parameters...")
-        self.automator.set_parameters(self.query_var.get(), quote_option, overlay_option, platform_option, tag, quote, author, font_option)
+        self.automator.set_parameters(self.query_var.get(), quote_option, overlay_option, self.automator.platform, tag, quote, author, font_option)
         print("Parameters set")
         print("Fetching quote and processing media...")
         self.automator.fetch_quote_and_process_media(self.image_file)

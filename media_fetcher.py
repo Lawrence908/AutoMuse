@@ -26,7 +26,9 @@ class MediaFetcher:
     def resize_image(self, image_path, platform, filename):
         # Open the image
         image = Image.open(image_path)
-
+        print(f"Resizing image for platform '{platform}'")
+        self.aspect_ratio, self.max_dimension = self.platform_dimensions.get(platform)
+        
 
         if self.aspect_ratio and self.max_dimension:
             # Calculate the aspect ratio of the image and the target size
@@ -62,8 +64,10 @@ class MediaFetcher:
         # Resize the downloaded image
         self.resize_image(filename, platform, filename)
 
-    def fetch_image(self, per_page=10):
+    def fetch_image(self, platform, per_page=10):
+        self.platform = platform
         print(f"Fetching images for query: {self.image_query}")
+        print(f"Platform: {self.platform}")
         url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}&sort=random"
         headers = {"Authorization": f"Client-ID {self.access_key}"}
         response = requests.get(url, headers=headers)

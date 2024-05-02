@@ -10,10 +10,13 @@ class QuoteFetcher:
         self.quote_option = quote_option
         if self.quote_option == "Enter your own text":
             self.user_entered_quote(quote, author)
-        elif self.quote_option == "quotable":
+        elif self.quote_option == "Quotable":
             self.fetch_quote_from_api(tag)
         elif self.quote_option == "stoic_quotes.json":
-            self.fetch_quote('config/stoic_quotes.json')
+            self.fetch_quote('quotes/stoic_quotes.json')
+
+        ## Insert new quote files here as above ##
+
         else:
             raise ValueError("Invalid quote option")
 
@@ -45,6 +48,9 @@ class QuoteFetcher:
             return None
         
     def user_entered_quote(self, quote, author):
+        print("quote in user_entered_quote", quote)
+        print("author in user_entered_quote", author)
+        
         wrapped_quote = textwrap.fill(quote, width=50)
         if author:
             return f'"{wrapped_quote}"\n            - {author}'

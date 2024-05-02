@@ -1,5 +1,6 @@
 import json
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import simpledialog, Listbox, Toplevel, Label, Canvas, Frame, Scrollbar, VERTICAL
 from automator import Automator
@@ -11,6 +12,8 @@ class AutomatorGUI:
         master.geometry("800x600")
 
         self.automator = Automator()  # Initialize the Automator class
+        # Initialize image_selection_frame
+        self.image_selection_frame = None
 
         with open('config/unsplash_queries.json') as f:
             self.unsplash_queries = json.load(f)
@@ -25,12 +28,11 @@ class AutomatorGUI:
         with open('config/fonts.json') as f:
             self.fonts = json.load(f)
 
-
         # Define the image query dropdown menu
         self.label1 = tk.Label(master, text="Image Query:")
         self.query_var = tk.StringVar(master)  # Variable to hold the selected query
         self.query_var.set(self.unsplash_queries[0])  # Default value
-        self.query_option_menu = tk.OptionMenu(master, self.query_var, *self.unsplash_queries)
+        self.query_option_menu = ttk.Combobox(master, textvariable=self.query_var, values=self.unsplash_queries)
         self.label1.pack()
         self.query_option_menu.pack()
 
@@ -43,8 +45,8 @@ class AutomatorGUI:
         # Define the image query entry widget
         self.label2 = tk.Label(master, text="Quote Option:")
         self.quote_var = tk.StringVar(master)
-        self.quote_var.set("Enter your own text")  # Default value
-        self.quote_option_menu = tk.OptionMenu(master, self.quote_var, "Enter your own text", "quotable", "stoic_quotes.json")
+        self.quote_var.set("Quotable")  # Default value
+        self.quote_option_menu = tk.OptionMenu(master, self.quote_var, "Enter your own text", "Quotable", "stoic_quotes.json")
 
         # Define the text overlay option widgets
         self.label3 = tk.Label(master, text="Text Overlay Option:")
@@ -85,6 +87,10 @@ class AutomatorGUI:
         self.font_option_menu.pack_forget()
 
     def fetch_image(self):
+        # Destroy the previous image frame if it exists
+        if hasattr(self, 'image_frame'):
+            self.image_frame.destroy()
+
         image_query = self.query_var.get()
         self.automator.image_query = image_query
         self.automator.platform = self.platform_var.get()
@@ -114,6 +120,10 @@ class AutomatorGUI:
                 image.thumbnail((200, 200))
                 photo = ImageTk.PhotoImage(image)
 
+                # Create the frame
+                self.image_selection_frame = tk.Frame(self.master)
+                self.image_selection_frame.pack(side='right', fill='both', expand=True)
+
                 label = Label(self.thumbnail_frame, image=photo)
                 label.image = photo
                 label.bind('<Button-1>', lambda event, image_file=image_file: self.select_image(image_file))  # Bind click event
@@ -130,44 +140,36 @@ class AutomatorGUI:
             # Update the scroll region of the canvas after adding the thumbnails
             self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 
-            # Add a button to process all images
-            self.process_all_button = tk.Button(self.master, text="Process All Images", command=self.process_all_images)
-            self.process_all_button.pack()
 
-        # Show the other widgets in the widget frame
-        self.fetch_quote_button.pack(in_=self.widget_frame)
-        self.label2.pack(in_=self.widget_frame)
-        self.quote_option_menu.pack(in_=self.widget_frame)
-        self.label3.pack(in_=self.widget_frame)
-        self.overlay_option_menu.pack(in_=self.widget_frame)
-        self.label4.pack(in_=self.widget_frame)
-        self.platform_option_menu.pack(in_=self.widget_frame)
-        self.label5.pack(in_=self.widget_frame)
-        self.tag_option_menu.pack(in_=self.widget_frame)
-        self.label6.pack(in_=self.widget_frame)
-        self.font_option_menu.pack(in_=self.widget_frame)
 
     def fetch_quote(self):
-        quote_option = self.quote_var.get()
-        text_overlay_option = self.overlay_var.get()
-        platform = self.platform_var.get()
-        font = self.font_var.get()
-        tag = None
-        quote = None
-        author = None
+        print("In fetch_quote")  # Debug print
 
-        if quote_option == "Enter your own text":
-            quote = simpledialog.askstring("Input", "Enter your quote:")
-            author = simpledialog.askstring("Input", "Enter the author:")
-            self.label5.pack_forget()
-            self.tag_option_menu.pack_forget()
-        elif quote_option == "quotable":
-            tag = self.tag_var.get()
-            self.label5.pack()
-            self.tag_option_menu.pack()
-        else:
-            self.label5.pack_forget()
-            self.tag_option_menu.pack_forget()
+        # Define platform before assigning it
+        platform = self.platform_combobox.get()
+        self.automator.platform = platform
+
+        # Define text_overlay_option before assigning it
+        text_overlay_option = self.overlay_combobox.get()
+        self.automator.text_overlay_option = text_overlay_option
+
+        # Define font before assigning it
+        font = self.font_combobox.get()
+        self.automator.font = font
+
+        # Define quote before assigning it
+        quote = self.quote_textbox.get("1.0", 'end')
+        self.automator.quote = quote
+
+        # Define author before using it
+        author = "Some value"
+        self.automator.author = author
+
+        # Define tag before using it
+        tag = "Some value"
+        self.automator.tag = tag
+
+        quote_option = self.quote_combobox.get()
 
         self.automator.quote_option = quote_option
         self.automator.text_overlay_option = text_overlay_option
@@ -177,41 +179,174 @@ class AutomatorGUI:
         self.automator.quote = quote
         self.automator.author = author
 
+        print("End of fetch_quote")  # Debug print
+
     def select_image(self, image_file):
         self.selected_image_file = image_file  # Update the selected image file
-        print(f"Selected image: {image_file}")
-        self.fetch_quote() # Fetch the quote based on the selected image
+        print(f"Selected image: {image_file}")  # Debug print
+        self.image_file = image_file
+
+        # Hide the image query dropdown and fetch image button
+        self.label1.pack_forget()
+        self.query_option_menu.pack_forget()
+        self.fetch_image_button.pack_forget()
+
+        # Show the selected image
+        self.image_frame.destroy()  # Destroy the previous image frame
+        self.image_frame = Frame(self.master)  # Create a new frame for the selected image
+        self.image_frame.pack(side='left', expand=True, fill='both')
+
+        image = Image.open(self.image_file)
+        image.thumbnail((200, 200))
+        photo = ImageTk.PhotoImage(image)
+
+        label = Label(self.image_frame, image=photo)
+        label.image = photo
+        label.pack()
+
+        # Hide the image selection frame and show the quote options frame
+        self.image_selection_frame.pack_forget()
+
+        # Show the quote options and fetch quote button
+        self.display_quote_options()
+
+        # Fetch the quote based on the selected image
+        self.fetch_quote()
+
+    def on_image_selected(self, event):
+        # Instead of opening a new window, show the quote options frame
+        self.display_quote_options()
 
     def display_quote_options(self):
-        # Define your quote options
-        self.quote_options = ['Option 1', 'Option 2', 'Option 3']
 
-        # Create a dictionary to store the state of each option
-        self.quote_options_state = {option: tk.BooleanVar() for option in self.quote_options}
+        print("In display_quote_options")  # Debug print
+        # ... rest of the code ...
 
-        # Create a checkbox for each option
-        for option in self.quote_options:
-            checkbox = tk.Checkbutton(self.master, text=option, variable=self.quote_options_state[option])
-            checkbox.pack()
+        # Create a new frame for the quote options
+        self.quote_options_frame = tk.Frame(self.master)
+        self.quote_options_frame.pack(side='right', fill='both', expand=True)
 
-        # Add a button to process the image after selecting the options
+        # Create the quote options dropdown
+        self.quote_combobox = ttk.Combobox(self.quote_options_frame, values=[ "Quotable","Enter your own text", "stoic_quotes.json"])
+        self.quote_combobox.pack()
+        self.quote_combobox.set('Quotable')
+
+        # Add a callback for when the selected quote option changes
+        self.quote_combobox.bind('<<ComboboxSelected>>', self.update_quote_options)
+
+        # Create the quotable tags dropdown in the quote options frame, but don't pack it yet
+        # tag_options = [f"{tag} ({count})" for tag, count in self.quotable_tags.items()]
+        # self.tag_combobox = ttk.Combobox(self.quote_options_frame, values=tag_options)
+        # self.tag_combobox.set(tag_options[0])
+
+        self.overlay_combobox = ttk.Combobox(self.master, values=["Top", "Middle", "Bottom"])
+        self.overlay_combobox.pack()
+        self.overlay_combobox.set('Middle')
+
+        self.platform_combobox = ttk.Combobox(self.master, values=self.platforms)
+        self.platform_combobox.pack()
+        self.platform_combobox.set(self.platforms[0])
+
+        tag_options = [f"{tag} ({count})" for tag, count in self.quotable_tags.items()]
+        self.tag_combobox = ttk.Combobox(self.master, values=tag_options)
+        self.tag_combobox.pack()
+        self.tag_combobox.set(tag_options[0])
+
+
+        self.font_combobox = ttk.Combobox(self.master, values=list(self.fonts.keys()))
+        self.font_combobox.pack()
+        self.font_combobox.set('roboto_bold')
+
+        # Set up the button
         self.process_button = tk.Button(self.master, text="Process Image", command=self.process_image)
         self.process_button.pack()
 
+        # # Add a command to the process button to hide the quote options frame and show the next frame
+        # self.process_button.config(command=self.show_next_frame)
+
+        # Create the textboxes for the quote and author, but don't pack them yet
+        self.quote_textbox = tk.Text(self.quote_options_frame, height=2, width=30)
+        self.author_textbox = tk.Text(self.quote_options_frame, height=2, width=30)
+
+    def update_quote_options(self, event):
+        # Get the selected quote option
+        quote_option = self.quote_combobox.get()
+
+        # Only destroy the widgets that need to be replaced
+        if hasattr(self, 'quote_label'):
+            self.quote_label.destroy()
+            del self.quote_label
+        if hasattr(self, 'author_label'):
+            self.author_label.destroy()
+            del self.author_label
+        if hasattr(self, 'quote_textbox'):
+            self.quote_textbox.destroy()
+            del self.quote_textbox
+        if hasattr(self, 'author_textbox'):
+            self.author_textbox.destroy()
+            del self.author_textbox
+
+        # Hide the tag_combobox
+        self.tag_combobox.pack_forget()
+
+        if quote_option == 'Enter your own text':
+            # Create the quote and author labels and textboxes
+            self.quote_label = tk.Label(self.quote_options_frame, text="Quote:")
+            self.quote_label.pack()
+            self.quote_textbox = tk.Entry(self.quote_options_frame)
+            self.quote_textbox.pack()
+
+            self.author_label = tk.Label(self.quote_options_frame, text="Author:")
+            self.author_label.pack()
+            self.author_textbox = tk.Entry(self.quote_options_frame)
+            self.author_textbox.pack()
+
+        elif quote_option == 'Quotable':
+            # Show the tag_combobox
+            self.tag_combobox.pack()
+
+    def show_next_frame(self):
+        # Define next_frame before packing it
+        self.next_frame = tk.Frame(self.master)
+        self.next_frame.pack(side='right', fill='both', expand=True)
+
     def process_image(self):
+        print("In process_image")
         # Get the selected options
-        selected_options = [option for option, state in self.quote_options_state.items() if state.get()]
+        quote_option = self.quote_combobox.get()
+        print("quote_option:", quote_option)
+        overlay_option = self.overlay_combobox.get()
+        print("overlay_option:", overlay_option)
+        platform_option = self.platform_combobox.get()
+        print("platform_option:", platform_option)
+        tag_option = self.tag_combobox.get()
+        print("tag_option:", tag_option)
+        tag = tag_option.split()[0]  # Extract the tag from the selected option
+        print("tag:", tag)
+        font_option = self.font_combobox.get()
+        print("font_option:", font_option)
 
-        print(f"Processing image: {self.selected_image_file} with options: {selected_options}")
-        # Add your image processing code here
-        # You can access the selected image file with self.selected_image_file
-        # You can access the selected options with selected_options
+        if quote_option == "Enter your own text":
+            quote = self.quote_textbox.get()
+            author = self.author_textbox.get()
 
-    def process_all_images(self):
-        for image_file in self.image_files:
-            self.selected_image_file = image_file
-            self.fetch_quote()
-            self.process_image()
+        else:
+            quote = None
+            author = None
+
+        print("End of process_image")
+
+        print("author:", author)
+        print("quote:", quote)
+
+        # Process the image with the selected options
+        print("Setting parameters...")
+        self.automator.set_parameters(self.query_var.get(), quote_option, overlay_option, platform_option, tag, quote, author, font_option)
+        print("Parameters set")
+        print("Fetching quote and processing media...")
+        self.automator.fetch_quote_and_process_media(self.image_file)
+
+        print("Image processed")
 
 
 

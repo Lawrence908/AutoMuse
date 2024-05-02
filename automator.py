@@ -39,6 +39,22 @@ class Automator:
         self.media_files = self.media_fetcher.fetch_image()
         return self.media_files
     
-    def fetch_quote_and_process_media(self):
-        quote = self.quote_fetcher.fetch_quote()
-        self.media_processor.process_media(media_type='image', path=self.media, platform=self.platform, quote=self.quote, text_overlay_option=self.text_overlay_option, font=self.font)
+    def fetch_quote_and_process_media(self, media_file):
+        if media_file:
+            self.media = media_file
+
+        if self.quote_option == "Enter your own text":
+            self.quote = self.quote_fetcher.user_entered_quote(self.quote, self.author)
+        elif self.quote_option == "Quotable":
+            self.quote = self.quote_fetcher.fetch_quote_from_api(self.tag)
+        elif self.quote_option == "stoic_quotes.json":
+            self.quote = self.quote_fetcher.fetch_quote(self.quote_option, 'config/stoic_quotes.json')
+
+        ## Insert new quote files here as above ##
+
+        else:
+            raise ValueError("Invalid quote option")
+        
+        print ("self.text_overlay_option", self.text_overlay_option)
+
+        self.media_processor.process_media(media_type='image', path=self.media, platform=self.platform, quote=self.quote, text_overlay_option=self.text_overlay_option, font=self.font, quote_option=self.quote_option)

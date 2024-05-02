@@ -1,5 +1,4 @@
 {
-    "fonts": {
         "roboto_bold": "fonts/Roboto/Roboto-BoldItalic.ttf",
         "roboto": "fonts/Roboto/Roboto-Regular.ttf",
         "jersey": "fonts/Jersey_15/Jersey15-Regular.ttf",
@@ -7,5 +6,4 @@
         "playfair": "fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf",
         "roboto_mono": "fonts/Roboto_Mono/static/RobotoMono-Regular.ttf",
         "ubuntu": "fonts/Ubuntu/Ubuntu-Regular.ttf"
-    }
 }

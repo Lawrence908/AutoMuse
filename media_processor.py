@@ -1,6 +1,7 @@
 import os
 import io
 import json
+import glob
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
 from quote_fetcher import QuoteFetcher
@@ -15,11 +16,18 @@ class MediaProcessor:
             self.fonts = json.load(f)
 
 
-    def overlay_text_on_image(self, image, text, platform, position='middle', font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
+    def overlay_text_on_image(self, image, text, platform, position='Middle', font='ubuntu', font_size_ratio=0.05, padding_ratio=0.01, corner_radius_ratio=0.02):
         dimensions = self.platform_dimensions.get(platform)
+        print(f"Dimensions for platform '{platform}': {dimensions}")
         if dimensions:
+            # Check if dimensions[0] is a list itself
+            if isinstance(dimensions[0], list):
+                resize_dimensions = dimensions[0]
+            else:
+                resize_dimensions = dimensions
+
             # Resize image to dimensions
-            image = image.resize((int(image.width * dimensions[0]), int(image.height * dimensions[1])))
+            image = image.resize((int(image.width * resize_dimensions[0]), int(image.height * resize_dimensions[1])))
         # Overlay text on image
         draw = ImageDraw.Draw(image)
         font_file = self.fonts.get(font)
@@ -35,11 +43,11 @@ class MediaProcessor:
             text_height = font_size * len(lines)  # The height of the text is roughly the size of the font times the number of lines
             # Calculate position to center text
             x = (image.width - max_text_width) / 2
-            if position == 'top':
+            if position == 'Top':
                 y = (0.5 * text_height)
-            elif position == 'bottom':
+            elif position == 'Bottom':
                 y = image.height - (1.5 * text_height)
-            else:  # default to 'middle'
+            else:  # default to 'Middle'
                 y = (image.height - text_height) / 2
             # Calculate padding and corner radius
             padding = max(image.width, image.height) * padding_ratio
@@ -124,26 +132,29 @@ class MediaProcessor:
 
         return video
     
-    def process_media(self, media_type, path, platform, text_overlay_option='middle', font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote=None, quote_text=None, tags=None):
-        # Instantiate the QuoteFetcher class
-        quote_fetcher = QuoteFetcher()
+    def process_media(self, media_type, path, platform, text_overlay_option, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote=None, quote_text=None, tags=None, quote_option=None):
+        # # Instantiate the QuoteFetcher class
+        # quote_fetcher = QuoteFetcher(quote_option)
 
         # Fetch a quote
         if quote_file:
+            quote_fetcher = QuoteFetcher(quote_option)
             text = quote_fetcher.fetch_quote(quote_file)
         elif tags:
+            quote_fetcher = QuoteFetcher(quote_option)
             text = quote_fetcher.fetch_quote_from_api(tags)
         elif quote:
             text = quote
         elif quote_text:
             text = quote_text
         else:
-            raise ValueError('Either quote_file, quote_topic, or quote must be provided')
+            raise ValueError('Either quote file, quote tag, or quote must be provided')
 
         if media_type == 'image':
             image = Image.open(path)
             processed_image = self.overlay_text_on_image(image, text, platform, text_overlay_option, font, font_size_ratio)
-            output_file = output_file if output_file else 'processed_image.jpg'
+            output_file = output_file if output_file else f'processed_images/processed_image_{len(glob.glob("processed_images/processed_image*.jpg")) + 1}.jpg'
+            output_file = output_file if output_file else 'processed_images/processed_image1.jpg'
             processed_image.save(output_file)
         elif media_type == 'video':
             processed_video = self.overlay_text_on_video(path, text, platform, font, font_size_ratio)

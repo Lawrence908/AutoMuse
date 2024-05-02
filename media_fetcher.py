@@ -1,12 +1,17 @@
 import os
 import io
 import json
+import random
 import requests
 from PIL import Image
 
 class MediaFetcher:
     def __init__(self, image_query="nature", platform="instagram"):
         self.access_key = os.getenv("UNSPLASH_ACCESS_KEY")
+
+        #Load the unsplash_queries.json file
+        with open('config/unsplash_queries.json') as f:
+            self.queries = json.load(f)
 
         # Load the platform dimensions from the JSON file
         with open('config/platform_dimensions.json') as f:
@@ -68,11 +73,27 @@ class MediaFetcher:
         self.platform = platform
         print(f"Fetching images for query: {self.image_query}")
         print(f"Platform: {self.platform}")
-        url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}&sort=random"
+
+        # Get a random page from 1 to the total number of pages for that query
+        query_total = self.queries.get(self.image_query)
+        if query_total is None:
+            raise ValueError('Invalid query')
+        query_pages = (query_total // per_page)
+        page = 1
+        if query_total > 1:
+            page = random.randint(1, max(1, int(0.8*query_pages)))
+
+        print(f"Fetching page {page} of {query_pages}")
+
+        url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}&page={page}"
+        # url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}"
         headers = {"Authorization": f"Client-ID {self.access_key}"}
         response = requests.get(url, headers=headers)
-        print(response)
-        data = response.json()
+        if response.status_code == 200:
+            data = response.json()
+        else:
+            print(f"Error: Received status code {response.status_code}")
+            return []
 
         image_files = []  # List to store the file paths of the images
 

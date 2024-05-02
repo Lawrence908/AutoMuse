@@ -38,8 +38,12 @@ class AutomatorGUI:
         # Define the image query dropdown menu
         self.label1 = tk.Label(master, text="Image Query:")
         self.query_var = tk.StringVar(master)  # Variable to hold the selected query
-        self.query_var.set(self.unsplash_queries[0])  # Default value
-        self.query_option_menu = ttk.Combobox(master, textvariable=self.query_var, values=self.unsplash_queries)
+
+        # Create a list of strings where each string is a key-value pair from the dictionary
+        query_options = [f"{query}: {count}" for query, count in self.unsplash_queries.items()]
+
+        self.query_var.set(query_options[0])  # Default value
+        self.query_option_menu = ttk.Combobox(master, textvariable=self.query_var, values=query_options)
         self.label1.pack()
         self.query_option_menu.pack()
 
@@ -98,11 +102,13 @@ class AutomatorGUI:
         if hasattr(self, 'image_frame'):
             self.image_frame.destroy()
 
-        image_query = self.query_var.get()
-        self.automator.image_query = image_query
+        selected_query = self.query_var.get()
+        # Split the selected query into the query and count parts
+        query, count = selected_query.split(':')
+        self.automator.image_query = query
         self.automator.platform = self.platform_combobox.get()
         print("In fetch_image")
-        print(f"Fetching images for query: {image_query}")
+        print(f"Fetching images for query: {query}")
         print(f"Platform: {self.automator.platform}")
         self.automator.create_media_fetcher()
         self.image_files = self.automator.fetch_media()

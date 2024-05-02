@@ -53,7 +53,7 @@ class Automator:
         elif self.quote_option == "Quotable":
             self.quote = self.quote_fetcher.fetch_quote_from_api(self.tag)
         elif self.quote_option == "stoic_quotes.json":
-            self.quote = self.quote_fetcher.fetch_quote(self.quote_option, 'config/stoic_quotes.json')
+            self.quote = self.quote_fetcher.fetch_quote(self.quote_option)
 
         ## Insert new quote files here as above ##
 

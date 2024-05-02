@@ -1,6 +1,7 @@
 import os
 import io
 import json
+import math
 import random
 import requests
 from PIL import Image
@@ -74,25 +75,30 @@ class MediaFetcher:
         print(f"Fetching images for query: {self.image_query}")
         print(f"Platform: {self.platform}")
 
-        # Get a random page from 1 to the total number of pages for that query
-        query_total = self.queries.get(self.image_query)
-        if query_total is None:
-            raise ValueError('Invalid query')
-        query_pages = (query_total // per_page)
-        page = 1
-        if query_total > 1:
-            page = random.randint(1, max(1, int(0.8*query_pages)))
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            # Get a random page from 1 to the total number of pages for that query
+            query_total = self.queries.get(self.image_query)
+            if query_total is None:
+                raise ValueError('Invalid query')
+            query_pages = math.ceil(query_total / per_page)
+            page = 1
+            if query_total > 1:
+                page = random.randint(1, max(1, int(0.8*query_pages)))
 
-        print(f"Fetching page {page} of {query_pages}")
+            print(f"Fetching page {page} of {query_pages}")
 
-        url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}&page={page}"
-        # url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}"
-        headers = {"Authorization": f"Client-ID {self.access_key}"}
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
+            url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}&page={page}"
+            # url = f"https://api.unsplash.com/search/photos?query={self.image_query}&per_page={per_page}"
+            headers = {"Authorization": f"Client-ID {self.access_key}"}
+            response = requests.get(url, headers=headers)
             data = response.json()
+            if data["results"]:  # Check if data["results"] is not empty
+                break
+            else:
+                print("No results found for this page, trying another one...")
         else:
-            print(f"Error: Received status code {response.status_code}")
+            print(f"Failed to get a successful response after {max_attempts} attempts")
             return []
 
         image_files = []  # List to store the file paths of the images

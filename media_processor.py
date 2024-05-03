@@ -127,23 +127,26 @@ class MediaProcessor:
 
         return video
     
-    def process_media(self, media_type, path, platform, text_overlay_option, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote=None, quote_text=None, tags=None, quote_option=None):
-        # # Instantiate the QuoteFetcher class
-        # quote_fetcher = QuoteFetcher(quote_option)
+    # def process_media(self, media_type, path, platform, text_overlay_option, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None, quote_file=None, quote=None, quote_text=None, tags=None, quote_option=None):
+    def process_media(self, media_type, path, text, platform, text_overlay_option, font='roboto_bold', font_size_ratio=0.05, audio_folder=None, output_file=None):
+        # # # Instantiate the QuoteFetcher class
+        # # quote_fetcher = QuoteFetcher(quote_option)
+        # if quote_option == "quotes/stoic_quotes.json":
+        #     quote_file = 'quotes/stoic_quotes.json'
 
-        # Fetch a quote
-        if quote_file:
-            quote_fetcher = QuoteFetcher(quote_option)
-            text = quote_fetcher.fetch_quote(quote_file)
-        elif tags:
-            quote_fetcher = QuoteFetcher(quote_option)
-            text = quote_fetcher.fetch_quote_from_api(tags)
-        elif quote:
-            text = quote
-        elif quote_text:
-            text = quote_text
-        else:
-            raise ValueError('Either quote file, quote tag, or quote must be provided')
+        # # Fetch a quote
+        # if quote_file:
+        #     quote_fetcher = QuoteFetcher(quote_option)
+        #     text = quote_fetcher.fetch_quote(quote_file)
+        # elif tags:
+        #     quote_fetcher = QuoteFetcher(quote_option)
+        #     text = quote_fetcher.fetch_quote_from_api(tags)
+        # elif quote:
+        #     text = quote
+        # elif quote_text:
+        #     text = quote_text
+        # else:
+        #     raise ValueError('Either quote file, quote tag, or quote must be provided')
 
         if media_type == 'image':
             image = Image.open(path)
@@ -151,6 +154,7 @@ class MediaProcessor:
             output_file = output_file if output_file else f'processed_images/processed_image_{len(glob.glob("processed_images/processed_image*.jpg")) + 1}.jpg'
             output_file = output_file if output_file else 'processed_images/processed_image1.jpg'
             processed_image.save(output_file)
+            return processed_image
         elif media_type == 'video':
             processed_video = self.overlay_text_on_video(path, text, platform, font, font_size_ratio)
             if audio_folder:

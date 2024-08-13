@@ -415,6 +415,9 @@ class AutomatorGUI:
         # Pack the fetch image button
         self.fetch_image_button.pack()
 
+        # Pack the load image button
+        self.load_image_button.pack()
+
         # Call the method to display the images
         self.display_images()
 

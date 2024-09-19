@@ -7,6 +7,12 @@
 "The best revenge is not to be like your enemy."
 - Marcus Aurelius
 
+"No man is an island"
+- Aristotle
+
+"Don't just say that you have read books. Show that through them you have learned to think better."
+- Epictetus 
+
 "If it's endurable, then endure it. Stop complaining."
 - Marcus Aurelius
 
@@ -21,6 +27,21 @@
 
 "If someone succeeds in provoking you, realize that your mind is complicit in the provocation."
 - Epictetus 
+
+"Accept death in a cheerful spirit, as nothing but the dissolution of the elements from which each living thing is composed. If it doesn't hurt the individual elements to change continually into one another, why are people afraid of all of them changing and separating? It’s a natural thing. And nothing natural is evil."
+- Marcus Aurelias
+
+"We can easily forgive a child who is afraid of the dark; the real tragedy of life is when men are afraid of the light." 
+- Plato
+
+"An empty vessel makes the loudest sound, so they that have the least wit are the greatest babblers."
+- Plato
+
+"Over and over you consult me about specific matters, forgetting that you and I are separated by a wide and empty sea. Given that most advice depends on the situation, my response on some points is bound to reach you just when the opposite counsel would be more to your advantage. For advice is geared to events, and events are always moving—no, hurtling—along. So advice should be formulated on the day it is needed. And even that is too slow: let it be formulated "on the spot," as the saying goes." 
+- Seneca
+
+"How, then, is advice to be found? Let me explain. Each time you want to know what to pursue or what to avoid, look to your highest good, the aim of your life as a whole. Everything we do ought to be in accordance with that aim. Only one who has the entirety of his life in view is in a position to arrange life’s particulars. Even with paints all at the ready, no one can render a likeness until he has decided what he wants to paint. That’s our mistake: everyone deliberates over the parts of life; no one over life as a whole. If you want to shoot an arrow, you must know what you are trying to hit: only then can you direct the point and steady the shaft. Our counsels are all astray in that they have no mark to aim at. If one doesn’t know what harbor to make for, there can be no favoring wind." 
+- Seneca, Letter 71.1-3
 
 "You don't have to turn this into something. It doesn't have to upset you."
 - Marcus Aurelius
@@ -40,11 +61,11 @@
 "Get back up when you fail. Celebrate behaving like a human."
 - Marcus Aurelius 
 
-"If a man knows not to which port he sails, no wind is favourable."
+"If a man knows not to which pretty he sails, no wind is favourable."
 - Seneca
 
-"Love the hand that fate deals you and play it as your own. Amor Fati"
-- Marcus Aurelius 
+"Love the hand that fate deals you and play it as your own."
+-Marcus Aurelius 
 
 "Society tames the wolf into a dog. And man is the most domesticated animal after all."
 - Nietzsche 
@@ -118,7 +139,7 @@ Don't chase, attract."
 "Waste no more time arguing what a good man should be. Be one"
 - Marcus Aurelius
 
-"Your days are numbered. Use them to throw open the windows of your soul to the sun. If you do not, the sun will soon set, and you with it."
+"Your days are numbered. Use them to throw open your the windows of your soul to the sun. If you don't, the sun will set and you will set with it."
 - Marcus Aurelius 
 
 "First say to yourself what you would be; and then do what you have to do."
@@ -132,3 +153,5 @@ Don't chase, attract."
 
 "It is impossible to learn that which you think you already know."
 - Epictetus
+
+
